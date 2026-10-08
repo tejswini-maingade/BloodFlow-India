@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment files (NEVER commit secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# AWS / Elastic Beanstalk
+.elasticbeanstalk/
+*.pem
+
+# Prisma local DB files (if any)
+*.db
