@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const num = (value, fallback) => {
   if (value === undefined || value === '') return fallback;

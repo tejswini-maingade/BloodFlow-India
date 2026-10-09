@@ -65,4 +65,23 @@ const login = z.object({
     .max(200),
 });
 
-module.exports = { createInventory, updateInventory, idParam, listQuery, login };
+const facilityListQuery = z.object({
+  city: z.string().trim().min(1, 'city cannot be empty').max(80).optional(),
+  type: z
+    .enum(['HOSPITAL', 'BLOOD_BANK'], { errorMap: () => ({ message: 'Invalid facility type' }) })
+    .optional(),
+});
+
+const alertsQuery = z.object({
+  limit: z.coerce
+    .number({ invalid_type_error: 'limit must be a number' })
+    .int('limit must be a whole number')
+    .min(1, 'limit must be at least 1')
+    .max(100, 'limit cannot exceed 100')
+    .default(20),
+});
+
+module.exports = {
+  createInventory, updateInventory, idParam, listQuery, login,
+  facilityListQuery, alertsQuery,
+};

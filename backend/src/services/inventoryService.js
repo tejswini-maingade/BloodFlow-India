@@ -89,4 +89,4 @@ async function remove(id) {
   await prisma.bloodInventory.delete({ where: { id } });
 }
 
-module.exports = { list, getById, create, update, remove, serialize };
+module.exports = { list, getById, create, update, remove, serialize, include };
