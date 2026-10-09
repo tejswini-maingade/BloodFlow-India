@@ -17,5 +17,37 @@ services:
       timeout: 3s
       retries: 10
 
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: bloodflow-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://bloodflow:bloodflow_dev_pw@db:5432/bloodflow
+      CORS_ORIGIN: http://localhost:8080
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (see .env.example)}
+      ADMIN_NAME: ${ADMIN_NAME:-Demo Admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: bloodflow-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
 volumes:
   bloodflow_pgdata:

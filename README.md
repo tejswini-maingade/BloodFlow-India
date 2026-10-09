@@ -62,3 +62,14 @@ cd ../backend && npm start      # API + React app on http://localhost:3000
 
 Express serves the built React app, so one process (and one port) is all Elastic Beanstalk needs.
 Set `FORCE_HTTPS=true` only when the site is served over HTTPS.
+
+## Docker
+
+```bash
+cp .env.example .env            # then fill in JWT_SECRET and admin values
+docker compose up -d --build    # db + backend (:3000) + frontend (:8080)
+docker compose exec backend node prisma/seed.js    # load SYNTHETIC demo data
+docker compose ps
+docker compose logs backend
+docker compose down             # add -v to also delete the database volume
+```
