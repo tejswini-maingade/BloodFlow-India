@@ -45,3 +45,11 @@ docker exec bloodflow-db psql -U bloodflow -d bloodflow -c "CREATE DATABASE bloo
 npm run db:migrate:test    # once, and after each schema migration
 npm test
 ```
+### Frontend (local)
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173 (proxies /api to the backend on :3000)
+```
+
