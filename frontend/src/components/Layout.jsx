@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const LINKS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -8,6 +9,8 @@ const LINKS = [
 ];
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+
   return (
     <div className="app">
       <header className="navbar">
@@ -21,6 +24,15 @@ export default function Layout() {
                 {label}
               </NavLink>
             ))}
+            {user ? (
+              <button type="button" className="nav-btn" onClick={logout}>
+                Log out
+              </button>
+            ) : (
+              <NavLink to="/login" className={({ isActive }) => (isActive ? 'active' : '')}>
+                Log in
+              </NavLink>
+            )}
           </nav>
         </div>
       </header>

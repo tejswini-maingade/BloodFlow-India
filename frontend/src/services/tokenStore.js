@@ -1,26 +1,44 @@
-// Where the admin login token is kept (used in Phase 3C).
-// sessionStorage is cleared when the tab closes, which is safer than localStorage for an admin token.
-const KEY = 'bloodflow_token';
+// Keeps the admin session in sessionStorage (cleared when the tab closes).
+const TOKEN_KEY = 'bloodflow_token';
+const USER_KEY = 'bloodflow_user';
 
-export const getToken = () => {
+const read = (key) => {
   try {
-    return sessionStorage.getItem(KEY);
+    return sessionStorage.getItem(key);
   } catch {
     return null;
   }
 };
 
-export const setToken = (token) => {
+const write = (key, value) => {
   try {
-    sessionStorage.setItem(KEY, token);
+    sessionStorage.setItem(key, value);
   } catch {
-    /* storage unavailable: user simply has to log in again */
+    /* storage unavailable: the user simply has to log in again */
   }
 };
 
-export const clearToken = () => {
+export const getToken = () => read(TOKEN_KEY);
+
+export const getUser = () => {
+  const raw = read(USER_KEY);
+  if (!raw) return null;
   try {
-    sessionStorage.removeItem(KEY);
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+export const saveSession = (token, user) => {
+  write(TOKEN_KEY, token);
+  write(USER_KEY, JSON.stringify(user));
+};
+
+export const clearSession = () => {
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
   } catch {
     /* ignore */
   }

@@ -153,3 +153,36 @@ summary { cursor: pointer; color: var(--brand); }
   .grid-3 { grid-template-columns: 1fr; }
   .filters label, select { width: 100%; }
 }
+
+/* Inputs */
+input[type='text'], input[type='email'], input[type='password'] {
+  font: inherit; color: var(--ink); background: #fff;
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.45rem 0.6rem; min-width: 150px;
+}
+input:focus-visible, .nav-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.units-input { width: 80px; min-width: 0; text-align: right; }
+
+/* Login */
+.login-wrap { display: flex; justify-content: center; padding-top: 1.5rem; }
+.login-card { width: 100%; max-width: 380px; display: grid; gap: 0.9rem; }
+.login-card label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+.login-card input { width: 100%; }
+
+/* Messages */
+.msg { border-radius: 8px; padding: 0.7rem 0.9rem; margin: 0 0 1rem; font-size: 0.92rem; border: 1px solid; }
+.msg-success { background: var(--low-bg); color: #14532d; border-color: #b7e4c7; }
+.msg-error { background: var(--critical-bg); color: #7f1d1d; border-color: #f5b5b5; }
+.msg-risk { margin-top: 0.35rem; }
+.card > .msg { margin: 0.75rem 0 0; }
+
+/* Buttons and nav */
+.btn-small { padding: 0.3rem 0.65rem; font-size: 0.85rem; }
+.btn-danger { background: var(--critical); }
+.row-actions { display: flex; gap: 0.4rem; }
+.nav-btn {
+  background: transparent; color: #cbd3ea; border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px; padding: 0.35rem 0.8rem; font: inherit; cursor: pointer; margin-left: 0.25rem;
+}
+.nav-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+@media (max-width: 520px) { .filters input { width: 100%; } }
