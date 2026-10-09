@@ -7,12 +7,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:migrate:test": "DATABASE_URL=${TEST_DATABASE_URL:-postgresql://bloodflow:bloodflow_dev_pw@localhost:5432/bloodflow_test} prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -20,15 +21,20 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
-    "prisma": "^6.19.3"
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^6.19.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "jest": "^30.5.2",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.1"
   },
   "engines": {
     "node": ">=20"

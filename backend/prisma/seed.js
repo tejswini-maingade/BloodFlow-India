@@ -1,4 +1,7 @@
 // SYNTHETIC DEMO DATA ONLY. These facilities and numbers are fictional.
+
+require('dotenv').config();
+const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -36,11 +39,27 @@ function mulberry32(seed) {
   };
 }
 
+async function seedAdmin() {
+  const { ADMIN_NAME = 'Demo Admin', ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD || ADMIN_PASSWORD.length < 10) {
+    console.warn('Skipping admin user: set ADMIN_EMAIL and ADMIN_PASSWORD (10+ chars) in .env');
+    return;
+  }
+  const email = ADMIN_EMAIL.toLowerCase();
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  await prisma.user.upsert({
+    where: { email },
+    update: { name: ADMIN_NAME, passwordHash },
+    create: { name: ADMIN_NAME, email, passwordHash, role: 'ADMIN' },
+  });
+  console.log(`Admin user ready: ${email}`);
+}
+
 async function main() {
   const rand = mulberry32(2026);
 
   // Clear in FK-safe order so the seed can be re-run.
-  await prisma.blood_inventory_placeholder?.deleteMany?.();
+  await prisma.alert.deleteMany();
   await prisma.bloodInventory.deleteMany();
   await prisma.facility.deleteMany();
 
@@ -58,6 +77,7 @@ async function main() {
     await prisma.bloodInventory.createMany({ data: rows });
   }
 
+  await seedAdmin();
   const facilities = await prisma.facility.count();
   const inventory = await prisma.bloodInventory.count();
   console.log(`Seeded ${facilities} demo facilities and ${inventory} inventory rows (synthetic data).`);

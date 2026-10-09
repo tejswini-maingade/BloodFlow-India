@@ -31,4 +31,20 @@ function calculateRisk(units, t = config.risk) {
   return { level, reason, model: MODEL_LABEL };
 }
 
-module.exports = { calculateRisk, MODEL_LABEL };
+const RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+
+/**
+ * Converts a risk level into a range of units, so the database can filter by
+ * risk using the SAME thresholds as calculateRisk (no duplicated numbers).
+ */
+function unitRangeForRisk(level, t = config.risk) {
+  switch (level) {
+    case 'LOW': return { gte: t.lowMin };
+    case 'MEDIUM': return { gte: t.mediumMin, lt: t.lowMin };
+    case 'HIGH': return { gte: t.highMin, lt: t.mediumMin };
+    case 'CRITICAL': return { lt: t.highMin };
+    default: throw new TypeError(`Unknown risk level: ${level}`);
+  }
+}
+
+module.exports = { calculateRisk, unitRangeForRisk, RISK_LEVELS, MODEL_LABEL };

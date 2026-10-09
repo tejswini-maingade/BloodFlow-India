@@ -30,3 +30,20 @@ describe('calculateRisk', () => {
     expect(() => calculateRisk(bad, T)).toThrow(TypeError);
   });
 });
+
+const { unitRangeForRisk } = require('../src/services/riskService');
+
+describe('unitRangeForRisk', () => {
+  test.each([
+    ['LOW', { gte: 20 }],
+    ['MEDIUM', { gte: 10, lt: 20 }],
+    ['HIGH', { gte: 5, lt: 10 }],
+    ['CRITICAL', { lt: 5 }],
+  ])('%s', (level, range) => {
+    expect(unitRangeForRisk(level, T)).toEqual(range);
+  });
+
+  test('rejects an unknown level', () => {
+    expect(() => unitRangeForRisk('SCARY', T)).toThrow(TypeError);
+  });
+});

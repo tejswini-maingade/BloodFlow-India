@@ -35,3 +35,13 @@ npm test                         # run tests
 ```
 
 **Demo data:** all facilities in the seed are fictional and labelled "(Demo)".
+
+### API tests
+
+Tests use a separate `bloodflow_test` database (never your dev data):
+
+```bash
+docker exec bloodflow-db psql -U bloodflow -d bloodflow -c "CREATE DATABASE bloodflow_test;"   # once
+npm run db:migrate:test    # once, and after each schema migration
+npm test
+```

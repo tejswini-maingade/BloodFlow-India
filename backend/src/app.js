@@ -2,42 +2,28 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const config = require('./config');
+const routes = require('./routes');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// Security headers
+// Behind a proxy (Elastic Beanstalk), this makes req.ip the real client address,
+// which the rate limiter needs. We'll confirm the exact value in Phase 6.
+app.set('trust proxy', 1);
+
 app.use(helmet());
-
-// Only allow the configured frontend origin
 app.use(cors({ origin: config.corsOrigin }));
-
-// Parse JSON request bodies
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 
 // Health check: used locally, by Docker, and by AWS Elastic Beanstalk
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    service: 'bloodflow-backend',
-  });
+  res.status(200).json({ status: 'healthy', service: 'bloodflow-backend' });
 });
 
-// 404 handler for unknown routes
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: { message: 'Route not found' },
-  });
-});
+app.use('/api', apiLimiter, routes);
 
-// Central error handler. Never leaks stack traces in production.
-// (Express recognises error handlers by their 4 arguments.)
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error(err);
-  const message =
-    config.nodeEnv === 'production' ? 'Internal server error' : err.message;
-  res.status(500).json({ success: false, error: { message } });
-});
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
