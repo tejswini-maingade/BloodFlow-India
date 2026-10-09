@@ -23,3 +23,15 @@ curl http://localhost:3000/health
 ```
 
 More documentation will be added as the project grows.
+
+## Database (local)
+
+```bash
+docker compose up -d db          # start PostgreSQL
+cd backend && npm install
+npx prisma migrate dev           # create tables
+npm run db:seed                  # load SYNTHETIC demo data
+npm test                         # run tests
+```
+
+**Demo data:** all facilities in the seed are fictional and labelled "(Demo)".

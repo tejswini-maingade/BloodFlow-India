@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FacilityType {
+  HOSPITAL
+  BLOOD_BANK
+}
+
+enum BloodGroup {
+  A_POS   @map("A+")
+  A_NEG   @map("A-")
+  B_POS   @map("B+")
+  B_NEG   @map("B-")
+  AB_POS  @map("AB+")
+  AB_NEG  @map("AB-")
+  O_POS   @map("O+")
+  O_NEG   @map("O-")
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum UserRole {
+  ADMIN
+}
+
+model Facility {
+  id        Int            @id @default(autoincrement())
+  name      String         @db.VarChar(150)
+  type      FacilityType   @default(HOSPITAL)
+  city      String         @db.VarChar(80)
+  state     String         @db.VarChar(80)
+  contact   String?        @db.VarChar(120)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  inventory BloodInventory[]
+
+  @@index([city])
+  @@map("facilities")
+}
+
+model BloodInventory {
+  id             Int        @id @default(autoincrement())
+  facilityId     Int        @map("facility_id")
+  bloodGroup     BloodGroup @map("blood_group")
+  unitsAvailable Int        @map("units_available")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@unique([facilityId, bloodGroup])
+  @@index([bloodGroup])
+  @@index([updatedAt])
+  @@map("blood_inventory")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(ADMIN)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Alert {
+  id        Int        @id @default(autoincrement())
+  bloodGroup BloodGroup @map("blood_group")
+  location  String     @db.VarChar(160)
+  riskLevel RiskLevel  @map("risk_level")
+  message   String
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("alerts")
+}
