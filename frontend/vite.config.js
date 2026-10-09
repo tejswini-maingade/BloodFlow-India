@@ -1,7 +1,6 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
-// In development, forward API calls to the Express backend.
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -11,4 +10,5 @@ export default defineConfig({
       '/health': 'http://localhost:3000',
     },
   },
+  test: { environment: 'jsdom' },
 });

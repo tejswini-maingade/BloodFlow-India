@@ -26,3 +26,6 @@ npm-debug.log*
 
 # Prisma local DB files (if any)
 *.db
+
+# Frontend build copied into the backend for Docker / Beanstalk bundles
+backend/public/

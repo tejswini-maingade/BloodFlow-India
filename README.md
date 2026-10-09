@@ -53,3 +53,12 @@ npm install
 npm run dev        # http://localhost:5173 (proxies /api to the backend on :3000)
 ```
 
+### Run as a single app (production-style)
+
+```bash
+cd frontend && npm run build
+cd ../backend && npm start      # API + React app on http://localhost:3000
+```
+
+Express serves the built React app, so one process (and one port) is all Elastic Beanstalk needs.
+Set `FORCE_HTTPS=true` only when the site is served over HTTPS.
