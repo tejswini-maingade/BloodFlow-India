@@ -74,6 +74,16 @@ docker compose logs backend
 docker compose down             # add -v to also delete the database volume
 ```
 
+![CI](https://github.com/tejswini-maingade/BloodFlow-India/actions/workflows/ci.yml/badge.svg)
+
+## CI and security
+
+Every push and pull request runs: lint, tests (with a real PostgreSQL), build, `npm audit`,
+and Trivy scans of the repository and both Docker images.
+
+**Policy:** the build fails only on HIGH or CRITICAL findings that **have a fix available**
+(and on high/critical advisories in production npm dependencies). Everything else is reported
+in the logs but does not fail the build. Exceptions live in `.trivyignore` with a reason and review date.
 **Pinned dependency:** Prisma is pinned to exactly `6.12.0`. Newer versions pull in a
 `deepmerge-ts` release affected by advisory GHSA-ggr8-5vv4-36mx (a build-time config merge
 library, not reachable from API input). Revisit when Prisma publishes a fixed release.
