@@ -73,3 +73,7 @@ docker compose ps
 docker compose logs backend
 docker compose down             # add -v to also delete the database volume
 ```
+
+**Pinned dependency:** Prisma is pinned to exactly `6.12.0`. Newer versions pull in a
+`deepmerge-ts` release affected by advisory GHSA-ggr8-5vv4-36mx (a build-time config merge
+library, not reachable from API input). Revisit when Prisma publishes a fixed release.

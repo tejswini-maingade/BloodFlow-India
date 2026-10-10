@@ -1,0 +1,21 @@
+const js = require('@eslint/js');
+const globals = require('globals');
+
+module.exports = [
+  { ignores: ['node_modules/', 'coverage/', 'public/'] },
+  js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+    },
+    // A leading underscore marks an argument as intentionally unused.
+    rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
+  },
+  {
+    files: ['tests/**/*.js'],
+    languageOptions: { globals: { ...globals.jest } },
+  },
+];

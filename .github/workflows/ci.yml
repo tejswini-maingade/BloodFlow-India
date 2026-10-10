@@ -1,0 +1,182 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege: the pipeline can only read the repository.
+permissions:
+  contents: read
+
+# A newer push cancels the older run on the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint, test, audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bloodflow
+          POSTGRES_PASSWORD: ci_only_password   # throwaway CI database, not a real secret
+          POSTGRES_DB: bloodflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bloodflow -d bloodflow_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://bloodflow:ci_only_password@localhost:5432/bloodflow_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Apply migrations to the test database
+        run: npm run db:migrate:test
+
+      - name: Tests
+        run: npm test
+
+      - name: npm audit (production dependencies, fails on high or critical)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: npm audit (everything, report only)
+        run: npm audit || true
+
+  frontend:
+    name: Frontend (lint, test, build, audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: npm audit (production dependencies, fails on high or critical)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: npm audit (everything, report only)
+        run: npm audit || true
+
+  security:
+    name: Trivy repository scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Step 1: report everything, never fails (so reviewers can see the full picture).
+      - name: Trivy report (all severities)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          format: table
+          exit-code: '0'
+
+      # Step 2: the gate. Only HIGH/CRITICAL findings that have a fix fail the build.
+      - name: Trivy gate (HIGH and CRITICAL with a fix available)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
+  docker:
+    name: Docker images (build, Trivy scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      # --pull fetches the newest base image, so we scan what we would really ship.
+      - name: Build backend image
+        run: docker build --pull -f backend/Dockerfile -t bloodflow-backend:ci .
+
+      - name: Build frontend image
+        run: docker build --pull -t bloodflow-frontend:ci ./frontend
+
+      - name: Trivy report, backend image (all severities)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: bloodflow-backend:ci
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          format: table
+          exit-code: '0'
+
+      - name: Trivy gate, backend image
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: bloodflow-backend:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
+      - name: Trivy report, frontend image (all severities)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: bloodflow-frontend:ci
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          format: table
+          exit-code: '0'
+
+      - name: Trivy gate, frontend image
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: bloodflow-frontend:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
