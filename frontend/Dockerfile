@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # ---- Stage 2: nginx (non-root variant) serves the static files ----
-FROM nginxinc/nginx-unprivileged:alpine
+FROM nginxinc/nginx-unprivileged:alpine-slim
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 USER 101
