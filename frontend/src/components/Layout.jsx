@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import Logo from './Logo';
+import ThemeToggle from './ThemeToggle';
 
 const LINKS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -16,7 +18,10 @@ export default function Layout() {
       <header className="navbar">
         <div className="navbar-inner">
           <NavLink to="/" className="brand">
-            <span aria-hidden="true">🩸</span> BloodFlow <b>India</b>
+            <Logo size={30} />
+            <span>
+              BloodFlow <b>India</b>
+            </span>
           </NavLink>
           <nav aria-label="Main">
             {LINKS.map(({ to, label, end }) => (
@@ -33,6 +38,7 @@ export default function Layout() {
                 Log in
               </NavLink>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>
