@@ -16,7 +16,7 @@ rm -rf "$STAGE"
 mkdir -p "$STAGE"
 cp backend/package.json backend/package-lock.json "$STAGE/"
 cp -r backend/src backend/prisma "$STAGE/"
-cp -r frontend/dist "$STAGE/public"          # Express serves this folder
+cp -r frontend/dist "$STAGE/public"
 [ -d .platform ] && cp -r .platform "$STAGE/"
 
 echo "==> Safety checks"
