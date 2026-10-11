@@ -2,15 +2,12 @@ import { api } from '../services/api';
 import { useApi } from '../hooks/useApi';
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
+import StatusBanner from '../components/StatusBanner';
+import BloodGroupCard from '../components/BloodGroupCard';
+import UnitsChart from '../components/UnitsChart';
 import { Loading, ErrorState, EmptyState } from '../components/States';
 import { formatNumber, timeAgo } from '../utils/format';
 import { RISK_ORDER, riskRanges } from '../utils/risk';
-
-function groupStatus(g) {
-  if (g.criticalCount > 0) return { tone: 'critical', text: `${g.criticalCount} critical` };
-  if (g.lowStockCount > 0) return { tone: 'high', text: `${g.lowStockCount} low stock` };
-  return { tone: 'ok', text: 'No shortages' };
-}
 
 export default function Dashboard() {
   const dash = useApi(() => api.getDashboard());
@@ -31,6 +28,7 @@ export default function Dashboard() {
 
   const ranges = riskRanges(riskThresholds);
   const rowTotal = RISK_ORDER.reduce((sum, level) => sum + riskDistribution[level], 0);
+  const criticalGroups = bloodGroups.filter((g) => g.criticalCount > 0).map((g) => g.bloodGroup);
 
   return (
     <>
@@ -44,37 +42,27 @@ export default function Dashboard() {
         </button>
       </div>
 
+      <StatusBanner criticalGroups={criticalGroups} latestUpdate={recentUpdates[0]?.updatedAt ?? null} />
+
       <section className="grid grid-4" aria-label="Key numbers">
         <StatCard label="Total units" value={formatNumber(totals.totalUnits)} />
         <StatCard label="Facilities" value={formatNumber(totals.totalFacilities)} hint="Hospitals and blood banks" />
-        <StatCard
-          label="Low stock"
-          value={totals.lowStockCount}
-          tone="high"
-          hint={`Stock rows at ${ranges.HIGH}`}
-        />
-        <StatCard
-          label="Critical"
-          value={totals.criticalCount}
-          tone="critical"
-          hint={`Stock rows ${ranges.CRITICAL}`}
-        />
+        <StatCard label="Low stock" value={totals.lowStockCount} tone="high" hint={`Stock rows at ${ranges.HIGH}`} />
+        <StatCard label="Critical" value={totals.criticalCount} tone="critical" hint={`Stock rows ${ranges.CRITICAL}`} />
       </section>
 
-      <section className="card" aria-label="Blood group summary">
+      <section className="section" aria-label="Blood group summary">
         <h2>Blood group summary</h2>
         <div className="grid grid-8">
-          {bloodGroups.map((g) => {
-            const status = groupStatus(g);
-            return (
-              <div key={g.bloodGroup} className={`group-tile tile-${status.tone}`}>
-                <div className="group-name">{g.bloodGroup}</div>
-                <div className="group-units">{formatNumber(g.totalUnits)} units</div>
-                <div className="group-status">{status.text}</div>
-              </div>
-            );
-          })}
+          {bloodGroups.map((g) => (
+            <BloodGroupCard key={g.bloodGroup} group={g} />
+          ))}
         </div>
+      </section>
+
+      <section className="card" aria-label="Units by blood group">
+        <h2>Units by blood group</h2>
+        <UnitsChart groups={bloodGroups} />
       </section>
 
       <div className="grid grid-2">
@@ -129,7 +117,7 @@ export default function Dashboard() {
       <section className="card" aria-label="Location overview">
         <h2>Location overview</h2>
         <div className="table-wrap">
-          <table>
+          <table className="responsive">
             <thead>
               <tr>
                 <th>City</th>
@@ -143,12 +131,12 @@ export default function Dashboard() {
             <tbody>
               {locations.map((l) => (
                 <tr key={`${l.city}-${l.state}`}>
-                  <td>{l.city}</td>
-                  <td>{l.state}</td>
-                  <td className="num">{l.facilities}</td>
-                  <td className="num">{formatNumber(l.totalUnits)}</td>
-                  <td className="num">{l.lowStockCount}</td>
-                  <td className="num">{l.criticalCount}</td>
+                  <td data-label="City">{l.city}</td>
+                  <td data-label="State">{l.state}</td>
+                  <td data-label="Facilities" className="num">{l.facilities}</td>
+                  <td data-label="Units" className="num">{formatNumber(l.totalUnits)}</td>
+                  <td data-label="Low stock" className="num">{l.lowStockCount}</td>
+                  <td data-label="Critical" className="num">{l.criticalCount}</td>
                 </tr>
               ))}
             </tbody>
@@ -159,7 +147,7 @@ export default function Dashboard() {
       <section className="card" aria-label="Recent inventory updates">
         <h2>Recent inventory updates</h2>
         <div className="table-wrap">
-          <table>
+          <table className="responsive">
             <thead>
               <tr>
                 <th>Facility</th>
@@ -173,12 +161,12 @@ export default function Dashboard() {
             <tbody>
               {recentUpdates.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.facility.name}</td>
-                  <td>{r.facility.city}</td>
-                  <td><strong>{r.bloodGroup}</strong></td>
-                  <td className="num">{r.unitsAvailable}</td>
-                  <td><RiskBadge level={r.risk.level} reason={r.risk.reason} /></td>
-                  <td>{timeAgo(r.updatedAt)}</td>
+                  <td data-label="Facility">{r.facility.name}</td>
+                  <td data-label="City">{r.facility.city}</td>
+                  <td data-label="Group"><strong>{r.bloodGroup}</strong></td>
+                  <td data-label="Units" className="num">{r.unitsAvailable}</td>
+                  <td data-label="Risk"><RiskBadge level={r.risk.level} reason={r.risk.reason} /></td>
+                  <td data-label="Updated">{timeAgo(r.updatedAt)}</td>
                 </tr>
               ))}
             </tbody>
