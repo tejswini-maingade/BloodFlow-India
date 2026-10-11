@@ -20,7 +20,10 @@ function buildSummary(rows, totalFacilities) {
 
   // Every blood group appears, even with zero stock.
   const groups = new Map(
-    API_GROUPS.map((g) => [g, { bloodGroup: g, totalUnits: 0, lowStockCount: 0, criticalCount: 0 }])
+    API_GROUPS.map((g) => [
+      g,
+      { bloodGroup: g, totalUnits: 0, lowStockCount: 0, criticalCount: 0, facilitiesTracked: 0 },
+    ])
   );
   const locations = new Map();
 
@@ -30,7 +33,10 @@ function buildSummary(rows, totalFacilities) {
 
     riskDistribution[level] += 1;
     tally(overall, level, row.unitsAvailable);
-    tally(groups.get(toApi(row.bloodGroup)), level, row.unitsAvailable);
+
+    const group = groups.get(toApi(row.bloodGroup));
+    tally(group, level, row.unitsAvailable);
+    group.facilitiesTracked += 1; // one row per facility and blood group
 
     const key = `${city}|${state}`;
     if (!locations.has(key)) {

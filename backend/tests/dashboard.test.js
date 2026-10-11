@@ -35,6 +35,8 @@ describe('GET /api/dashboard', () => {
     expect(groups.find((g) => g.bloodGroup === 'O-')).toMatchObject({ totalUnits: 3, criticalCount: 1 });
     expect(groups.find((g) => g.bloodGroup === 'A+')).toMatchObject({ totalUnits: 7, lowStockCount: 1 });
     expect(groups.find((g) => g.bloodGroup === 'AB-').totalUnits).toBe(0);
+    expect(groups.find((g) => g.bloodGroup === 'O+').facilitiesTracked).toBe(2);
+    expect(groups.find((g) => g.bloodGroup === 'AB-').facilitiesTracked).toBe(0);
   });
 
   test('location summary', async () => {

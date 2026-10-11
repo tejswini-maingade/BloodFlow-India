@@ -87,7 +87,7 @@ export default function Availability() {
             {result.meta.count} result{result.meta.count === 1 ? '' : 's'}
           </p>
           <div className="table-wrap">
-            <table>
+            <table className="responsive">
               <thead>
                 <tr>
                   <th>Facility</th>
@@ -103,19 +103,21 @@ export default function Availability() {
               <tbody>
                 {result.data.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.facility.name}</td>
-                    <td>{row.facility.city}</td>
-                    <td>{row.facility.state}</td>
-                    <td><strong>{row.bloodGroup}</strong></td>
-                    <td className="num">{row.unitsAvailable}</td>
-                    <td><RiskBadge level={row.risk.level} reason={row.risk.reason} /></td>
-                    <td className="reason">
+                    <td data-label="Facility">{row.facility.name}</td>
+                    <td data-label="City">{row.facility.city}</td>
+                    <td data-label="State">{row.facility.state}</td>
+                    <td data-label="Group"><strong>{row.bloodGroup}</strong></td>
+                    <td data-label="Units" className="num">{row.unitsAvailable}</td>
+                    <td data-label="Risk"><RiskBadge level={row.risk.level} reason={row.risk.reason} /></td>
+                    <td data-label="Why" className="reason">
                       <details>
                         <summary>Explain</summary>
                         <p>{row.risk.reason}</p>
                       </details>
                     </td>
-                    <td title={new Date(row.updatedAt).toLocaleString()}>{timeAgo(row.updatedAt)}</td>
+                    <td data-label="Updated" title={new Date(row.updatedAt).toLocaleString()}>
+                      {timeAgo(row.updatedAt)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

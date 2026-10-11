@@ -48,7 +48,7 @@ export default function HospitalDetail() {
           <p className="muted">No stock recorded for this facility.</p>
         ) : (
           <div className="table-wrap">
-            <table>
+            <table className="responsive">
               <thead>
                 <tr>
                   <th>Group</th>
@@ -61,11 +61,11 @@ export default function HospitalDetail() {
               <tbody>
                 {f.inventory.map((row) => (
                   <tr key={row.id}>
-                    <td><strong>{row.bloodGroup}</strong></td>
-                    <td className="num">{row.unitsAvailable}</td>
-                    <td><RiskBadge level={row.risk.level} reason={row.risk.reason} /></td>
-                    <td className="reason">{row.risk.reason}</td>
-                    <td>{timeAgo(row.updatedAt)}</td>
+                    <td data-label="Group"><strong>{row.bloodGroup}</strong></td>
+                    <td data-label="Units" className="num">{row.unitsAvailable}</td>
+                    <td data-label="Risk"><RiskBadge level={row.risk.level} reason={row.risk.reason} /></td>
+                    <td data-label="Why" className="reason">{row.risk.reason}</td>
+                    <td data-label="Updated">{timeAgo(row.updatedAt)}</td>
                   </tr>
                 ))}
               </tbody>
