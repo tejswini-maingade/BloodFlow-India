@@ -242,4 +242,4 @@ email notifications on health changes, and the smoke-test script.
 
 ## License
 
-MIT. Copyright (c) 2026 YOUR_NAME
+MIT. Copyright (c) 2026 Tejswini-Maingade
